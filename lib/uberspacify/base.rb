@@ -116,8 +116,8 @@ RewriteRule (.*) http://localhost:#{fetch :puma_port}/$1 [P]
 
     namespace :assets do
       task :fix_permissions do
-        run "find #{shared_path}/assets -type d -exec chmod 755 {} ;"
-        run "find #{shared_path}/assets -type f -exec chmod 644 {} ;"
+        run "find #{shared_path}/assets -type d -exec chmod 755 \{\} \;"
+        run "find #{shared_path}/assets -type f -exec chmod 644 \{\} \;"
       end
     end
   end
