@@ -86,9 +86,9 @@ RewriteBase /
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule (.*) http://localhost:#{fetch :puma_port}/$1 [P]
       EOF
-      path = fetch(:domain) ? "/var/www/virtual/#{fetch :user}/#{fetch :domain}" : "#{fetch :home}/html"
-      put htaccess,       "#{shared_path}/config/.htaccess"
-      run                 "chmod 644 #{shared_path}/config/.htaccess"
+      run           "mkdir -p #{shared_path}/config"
+      put htaccess, "#{shared_path}/config/.htaccess"
+      run           "chmod 644 #{shared_path}/config/.htaccess"
     end
   end
 
