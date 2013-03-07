@@ -35,14 +35,15 @@ Capistrano::Configuration.instance.load do
   default_run_options[:pty]   = true
 
   # callbacks
-  before  'deploy:setup',           'rvm:install_rvm'
-  before  'deploy:setup',           'rvm:install_ruby'
-  after   'deploy:setup',           'uberspace:setup_svscan'
-  after   'deploy:setup',           'daemontools:setup_daemon'
-  after   'deploy:setup',           'apache:setup_reverse_proxy'
-  before  'deploy:finalize_update', 'deploy:symlink_shared'
-  before  'deploy:finalize_update', 'deploy:symlink_public'
-  after   'deploy',                 'deploy:cleanup'
+  before  'deploy:setup',             'rvm:install_rvm'
+  before  'deploy:setup',             'rvm:install_ruby'
+  after   'deploy:setup',             'uberspace:setup_svscan'
+  after   'deploy:setup',             'daemontools:setup_daemon'
+  after   'deploy:setup',             'apache:setup_reverse_proxy'
+  before  'deploy:finalize_update',   'deploy:symlink_shared'
+  before  'deploy:finalize_update',   'deploy:symlink_public'
+  after   'deploy',                   'deploy:cleanup'
+  after   'deploy:assets:precompile', 'deploy:assets:fix_permissions'
 
   # custom recipes
   namespace :uberspace do
@@ -111,6 +112,13 @@ RewriteRule (.*) http://localhost:#{fetch :puma_port}/$1 [P]
     task :symlink_public do
       path = fetch(:domain) ? "/var/www/virtual/#{fetch :user}/#{fetch :domain}" : "#{fetch :home}/html"
       run "ln -nfs #{release_path}/public #{path}"
+    end
+
+    namespace :assets do
+      task :fix_permissions do
+        run "find #{shared_path}/assets -type d -exec chmod 755 {};"
+        run "find #{shared_path}/assets -type f -exec chmod 644 {};"
+      end
     end
   end
 
