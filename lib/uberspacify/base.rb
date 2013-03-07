@@ -118,7 +118,7 @@ RewriteRule (.*) http://localhost:#{fetch :puma_port}/$1 [P]
     end
 
     task :fix_permissions do
-      run "chmod 755 #{fetch :deploy_to} #{release_path} #{shared_path} #{releases_path}"
+      run "chmod 755 #{fetch :deploy_to} #{release_path} #{shared_path} #{shared_path}/config #{releases_path}"
     end
 
     namespace :assets do
