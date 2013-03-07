@@ -42,6 +42,7 @@ Capistrano::Configuration.instance.load do
   after   'deploy:setup',             'apache:setup_reverse_proxy'
   before  'deploy:finalize_update',   'deploy:symlink_shared'
   before  'deploy:finalize_update',   'deploy:symlink_public'
+  before  'deploy:finalize_update',   'deploy:fix_permissions'
   after   'deploy',                   'deploy:cleanup'
   after   'deploy:assets:precompile', 'deploy:assets:fix_permissions'
 
@@ -112,6 +113,12 @@ RewriteRule (.*) http://localhost:#{fetch :puma_port}/$1 [P]
     task :symlink_public do
       path = fetch(:domain) ? "/var/www/virtual/#{fetch :user}/#{fetch :domain}" : "#{fetch :home}/html"
       run "ln -nfs #{release_path}/public #{path}"
+      run "find #{release_path}/public -type d -print0 | xargs -0 chmod 755"
+      run "find #{release_path}/public -type f -print0 | xargs -0 chmod 644"
+    end
+
+    task :fix_permissions do
+      run "chmod 755 #{fetch :deploy_to} #{release_path} #{shared_path} #{releases_path}"
     end
 
     namespace :assets do
