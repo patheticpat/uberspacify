@@ -84,8 +84,9 @@ RewriteRule ^(.*)$ http://localhost:#{fetch :puma_port}/$1 [P]
       EOF
       path = fetch(:domain) ? "/var/www/virtual/#{fetch :user}/#{fetch :domain}" : "#{fetch :home}/html"
       run                 "mkdir -p #{path}"
+      run                 "chmod 755 #{path}"
       put htaccess,       "#{path}/.htaccess"
-      run                 "chmod +r #{path}/.htaccess"
+      run                 "chmod 644 #{path}/.htaccess"
     end
   end
 
