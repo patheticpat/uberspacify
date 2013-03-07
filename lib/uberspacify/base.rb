@@ -29,6 +29,7 @@ Capistrano::Configuration.instance.load do
   set(:rvm_type)                { :user }
   set(:rvm_install_ruby)        { :install }
   set(:rvm_ruby_string)         { "ree@rails-#{application}" }
+  set(:group_writable)          { false }
 
   ssh_options[:forward_agent] = true
   default_run_options[:pty]   = true
