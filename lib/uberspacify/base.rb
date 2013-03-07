@@ -80,21 +80,15 @@ exec multilog t ./main
 
   namespace :apache do
     task :setup_reverse_proxy do
-      path = fetch(:domain) ? "/var/www/virtual/#{fetch :user}/#{fetch :domain}" : "#{fetch :home}/html"
       htaccess = <<-EOF
 RewriteEngine On
 RewriteBase /
-RewriteCond #{path}/public%{REQUEST_URI} -f
-RewriteRule (.*) public/$1 [L]
-
-RewriteCond %{REQUEST_URI} !^/public/
-RewriteCond #{path}/public%{REQUEST_URI} !-f
+RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule (.*) http://localhost:#{fetch :puma_port}/$1 [P]
       EOF
-      run                 "mkdir -p #{path}"
-      run                 "chmod 755 #{path}"
-      put htaccess,       "#{path}/.htaccess"
-      run                 "chmod 644 #{path}/.htaccess"
+      path = fetch(:domain) ? "/var/www/virtual/#{fetch :user}/#{fetch :domain}" : "#{fetch :home}/html"
+      put htaccess,       "#{shared_path}/config/.htaccess"
+      run                 "chmod 644 #{shared_path}/config/.htaccess"
     end
   end
 
@@ -111,11 +105,12 @@ RewriteRule (.*) http://localhost:#{fetch :puma_port}/$1 [P]
 
     task :symlink_shared do
       run "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
+      run "ln -nfs #{shared_path}/config/.htaccess #{release_path}/public/.htaccess"
     end
 
     task :symlink_public do
       path = fetch(:domain) ? "/var/www/virtual/#{fetch :user}/#{fetch :domain}" : "#{fetch :home}/html"
-      run "ln -nfs #{release_path}/public #{path}/public"
+      run "ln -nfs #{release_path}/public #{path}"
     end
   end
 
