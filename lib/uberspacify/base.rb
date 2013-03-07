@@ -14,7 +14,7 @@ Capistrano::Configuration.instance.load do
 
   # optional variables
   _cset(:domain)                { nil }
-  _cset(:passenger_port)        { rand(61000-32768+1)+32768 } # random ephemeral port
+  _cset(:puma_port)             { rand(61000-32768+1)+32768 } # random ephemeral port
 
   _cset(:deploy_via)            { :remote_cache }
   _cset(:git_enable_submodules) { 1 }
@@ -57,7 +57,7 @@ export HOME=#{fetch :home}
 source $HOME/.bash_profile
 cd #{fetch :deploy_to}/current
 rvm use #{fetch :rvm_ruby_string}
-exec bundle exec passenger start -p #{fetch :passenger_port} -e production 2>&1
+exec bundle exec puma -b tcp://127.0.0.1:#{fetch :puma_port} -e production 2>&1
       EOF
 
       log_script = <<-EOF
@@ -80,7 +80,7 @@ exec multilog t ./main
     task :setup_reverse_proxy do
       htaccess = <<-EOF
 RewriteEngine On
-RewriteRule ^(.*)$ http://localhost:#{fetch :passenger_port}/$1 [P]
+RewriteRule ^(.*)$ http://localhost:#{fetch :puma_port}/$1 [P]
       EOF
       path = fetch(:domain) ? "/var/www/virtual/#{fetch :user}/#{fetch :domain}" : "#{fetch :home}/html"
       run                 "mkdir -p #{path}"
