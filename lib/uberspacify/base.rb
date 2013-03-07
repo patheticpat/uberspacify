@@ -41,6 +41,7 @@ Capistrano::Configuration.instance.load do
   after   'deploy:setup',           'daemontools:setup_daemon'
   after   'deploy:setup',           'apache:setup_reverse_proxy'
   before  'deploy:finalize_update', 'deploy:symlink_shared'
+  before  'deploy:finalize_update', 'deploy:symlink_public'
   after   'deploy',                 'deploy:cleanup'
 
   # custom recipes
@@ -79,11 +80,17 @@ exec multilog t ./main
 
   namespace :apache do
     task :setup_reverse_proxy do
+      path = fetch(:domain) ? "/var/www/virtual/#{fetch :user}/#{fetch :domain}" : "#{fetch :home}/html"
       htaccess = <<-EOF
 RewriteEngine On
-RewriteRule ^(.*)$ http://localhost:#{fetch :puma_port}/$1 [P]
+RewriteBase /
+RewriteCond #{path}/public%{REQUEST_URI} -f
+RewriteRule (.*) public/$1 [L]
+
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteCond #{path}/public%{REQUEST_URI} !-f
+RewriteRule (.*) http://localhost:#{fetch :puma_port}/$1 [P]
       EOF
-      path = fetch(:domain) ? "/var/www/virtual/#{fetch :user}/#{fetch :domain}" : "#{fetch :home}/html"
       run                 "mkdir -p #{path}"
       run                 "chmod 755 #{path}"
       put htaccess,       "#{path}/.htaccess"
@@ -104,6 +111,11 @@ RewriteRule ^(.*)$ http://localhost:#{fetch :puma_port}/$1 [P]
 
     task :symlink_shared do
       run "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
+    end
+
+    task :symlink_public do
+      path = fetch(:domain) ? "/var/www/virtual/#{fetch :user}/#{fetch :domain}" : "#{fetch :home}/html"
+      run "ln -nfs #{release_path}/public #{path}/public"
     end
   end
 
