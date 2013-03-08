@@ -22,7 +22,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'rvm-capistrano',    '>=1.2.5'
   
   # dependencies for puma on Uberspace
-  gem.add_dependency 'puma'
+  gem.add_dependency 'thin'
   
   # dependency for mysql on Uberspace
   gem.add_dependency 'mysql2',            '>=0.3.11'
