@@ -61,7 +61,7 @@ export HOME=#{fetch :home}
 source $HOME/.bash_profile
 cd #{fetch :deploy_to}/current
 rvm use #{fetch :rvm_ruby_string}
-exec bundle exec thin start -p #{fetch :thin_port} -e production 2>&1
+exec bundle exec thin start -p #{fetch :thin_port} -R config.ru -e production 2>&1
       EOF
 
       log_script = <<-EOF
