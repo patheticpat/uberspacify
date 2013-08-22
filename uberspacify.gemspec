@@ -21,8 +21,8 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'capistrano_colors', '>=0.5.5'
   gem.add_dependency 'rvm-capistrano',    '>=1.2.5'
   
-  # dependencies for puma on Uberspace
-  gem.add_dependency 'thin'
+  # dependencies for foreman on Uberspace
+  gem.add_dependency 'foreman'
   
   # dependency for mysql on Uberspace
   gem.add_dependency 'mysql2',            '>=0.3.11'

@@ -14,7 +14,7 @@ Capistrano::Configuration.instance.load do
 
   # optional variables
   _cset(:domain)                { nil }
-  _cset(:thin_port)             { rand(61000-32768+1)+32768 } # random ephemeral port
+  _cset(:port)             { rand(61000-32768+1)+32768 } # random ephemeral port
 
   _cset(:deploy_via)            { :remote_cache }
   _cset(:git_enable_submodules) { 1 }
@@ -61,7 +61,7 @@ export HOME=#{fetch :home}
 source $HOME/.bash_profile
 cd #{fetch :deploy_to}/current
 rvm use #{fetch :rvm_ruby_string}
-exec bundle exec thin start -p #{fetch :thin_port} -R config.ru -e production 2>&1
+exec bundle exec foreman --env #{shared_path}/config/env start 2>&1
       EOF
 
       log_script = <<-EOF
@@ -69,10 +69,15 @@ exec bundle exec thin start -p #{fetch :thin_port} -R config.ru -e production 2>
 exec multilog t ./main
       EOF
 
+      foreman_env = <<-EOF
+PORT=#{fetch :port}
+      EOF
+
       run                 "mkdir -p #{fetch :home}/etc/run-rails-#{fetch :application}"
       run                 "mkdir -p #{fetch :home}/etc/run-rails-#{fetch :application}/log"
       put daemon_script,  "#{fetch :home}/etc/run-rails-#{fetch :application}/run"
       put log_script,     "#{fetch :home}/etc/run-rails-#{fetch :application}/log/run"
+      put foreman_env,    "#{shared_path}/config/env"
       run                 "chmod +x #{fetch :home}/etc/run-rails-#{fetch :application}/run"
       run                 "chmod +x #{fetch :home}/etc/run-rails-#{fetch :application}/log/run"
       run                 "ln -nfs #{fetch :home}/etc/run-rails-#{fetch :application} #{fetch :home}/service/rails-#{fetch :application}"
@@ -86,7 +91,7 @@ exec multilog t ./main
 RewriteEngine On
 RewriteBase /
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule (.*) http://localhost:#{fetch :thin_port}/$1 [P]
+RewriteRule (.*) http://localhost:#{fetch :port}/$1 [P]
       EOF
       run           "mkdir -p #{shared_path}/config"
       put htaccess, "#{shared_path}/config/.htaccess"
