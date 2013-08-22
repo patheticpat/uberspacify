@@ -14,7 +14,7 @@ Capistrano::Configuration.instance.load do
 
   # optional variables
   _cset(:domain)                { nil }
-  _cset(:port)             { rand(61000-32768+1)+32768 } # random ephemeral port
+  _cset(:server_port)             { rand(61000-32768+1)+32768 } # random ephemeral port
 
   _cset(:deploy_via)            { :remote_cache }
   _cset(:git_enable_submodules) { 1 }
@@ -70,7 +70,7 @@ exec multilog t ./main
       EOF
 
       foreman_env = <<-EOF
-PORT=#{fetch :port}
+PORT=#{fetch :server_port}
       EOF
 
       run                 "mkdir -p #{fetch :home}/etc/run-rails-#{fetch :application}"
@@ -91,7 +91,7 @@ PORT=#{fetch :port}
 RewriteEngine On
 RewriteBase /
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule (.*) http://localhost:#{fetch :port}/$1 [P]
+RewriteRule (.*) http://localhost:#{fetch :server_port}/$1 [P]
       EOF
       run           "mkdir -p #{shared_path}/config"
       put htaccess, "#{shared_path}/config/.htaccess"
